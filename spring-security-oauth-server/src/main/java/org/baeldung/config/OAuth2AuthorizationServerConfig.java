@@ -12,12 +12,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.jdbc.datasource.init.DatabasePopulator;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -28,6 +30,9 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
 
 @Configuration
 @PropertySource({ "classpath:persistence.properties" })
@@ -77,19 +82,19 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
 		final TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
 		tokenEnhancerChain.setTokenEnhancers(Arrays.asList(tokenEnhancer()));
 		endpoints.tokenStore(tokenStore())
-				// .accessTokenConverter(accessTokenConverter())
+			//	 .accessTokenConverter(accessTokenConverter())
 				.tokenEnhancer(tokenEnhancerChain).authenticationManager(authenticationManager);
 		// @formatter:on
     }
 
-    // @Autowired
-    // public void init(AuthenticationManagerBuilder auth) throws Exception {
-//		// @formatter:off
-//		auth.jdbcAuthentication().dataSource(dataSource());
-//		// @formatter:on
-    // }
+     @Autowired
+     public void init(AuthenticationManagerBuilder auth) throws Exception {
+		// @formatter:off
+		auth.jdbcAuthentication().dataSource(dataSource());
+		// @formatter:on
+     }
 
-    /*
+    
     @Bean
     public TokenStore tokenStore() {
     return new JwtTokenStore(accessTokenConverter());
@@ -103,7 +108,7 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
     converter.setKeyPair(keyStoreKeyFactory.getKeyPair("mytest"));
     return converter;
     }
-    */
+    
     @Bean
     @Primary
     public DefaultTokenServices tokenServices() {
@@ -120,13 +125,13 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
 
     // JDBC token store configuration
 
-    @Bean
-    public DataSourceInitializer dataSourceInitializer(final DataSource dataSource) {
-        final DataSourceInitializer initializer = new DataSourceInitializer();
-        initializer.setDataSource(dataSource);
-        initializer.setDatabasePopulator(databasePopulator());
-        return initializer;
-    }
+//    @Bean
+//    public DataSourceInitializer dataSourceInitializer(final DataSource dataSource) {
+//        final DataSourceInitializer initializer = new DataSourceInitializer();
+//        initializer.setDataSource(dataSource);
+//        initializer.setDatabasePopulator(databasePopulator());
+//        return initializer;
+//    }
 
     private DatabasePopulator databasePopulator() {
         final ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
@@ -145,9 +150,9 @@ public class OAuth2AuthorizationServerConfig extends AuthorizationServerConfigur
         return dataSource;
     }
 
-    @Bean
-    public TokenStore tokenStore() {
-        return new JdbcTokenStore(dataSource());
-    }
+//    @Bean
+//    public TokenStore tokenStore() {
+//        return new JdbcTokenStore(dataSource());
+//    }
 
 }
